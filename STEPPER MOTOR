@@ -1,0 +1,24 @@
+// TB6600 스테퍼 모터 핀 설정
+const int PUL = 5;  // Pulse 핀
+const int DIR = 4;  // 방향 핀
+const int ENA = 6;  // Enable 핀
+
+const int stepDelay = 20000;  // 스텝당 지연시간 (20000)
+
+void setup() {
+  // TB6600 스테퍼 모터 핀 초기화
+  pinMode(PUL, OUTPUT);
+  pinMode(DIR, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  
+  digitalWrite(ENA, HIGH); // TB6600 활성화
+  digitalWrite(DIR, HIGH); // 스텝퍼 모터 회전 방향 설정 (HIGH = 시계 방향, LOW = 반시계 방향)
+}
+
+void loop() {
+  // 스텝퍼 모터가 한 방향으로 계속 회전
+  digitalWrite(PUL, HIGH);
+  delayMicroseconds(stepDelay);
+  digitalWrite(PUL, LOW);
+  delayMicroseconds(stepDelay);
+}
