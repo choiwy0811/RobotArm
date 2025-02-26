@@ -1,0 +1,79 @@
+#include "HCPCA9685.h"
+
+/* I2C slave address for the device/module */
+#define I2CAdd 0x40
+HCPCA9685 HCPCA9685(I2CAdd);
+
+// 서보모터 초기 위치 값
+int servo_joint_L_parking_pos = 60; // 엘보우 왼쪽
+int servo_joint_R_parking_pos = 60; // 엘보우 오른쪽
+int servo_joint_1_parking_pos = 70;
+int servo_joint_2_parking_pos = 47;
+int servo_joint_3_parking_pos = 63;
+int servo_joint_4_parking_pos = 63;
+
+// TB6600 스테퍼 모터 핀 설정
+const int PUL = 7;  // Pulse 핀
+const int DIR = 6;  // 방향 핀
+const int ENA = 5;  // Enable 핀
+
+const int stepDelay = 20000;  // 스텝당 지연시간 (9500)
+
+void setup() {
+  // TB6600 스테퍼 모터 핀 초기화
+  pinMode(PUL, OUTPUT);
+  pinMode(DIR, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  
+  digitalWrite(ENA, HIGH); // TB6600 활성화
+  digitalWrite(DIR, HIGH); // 스텝퍼 모터 회전 방향 설정 (HIGH = 시계 방향, LOW = 반시계 방향)
+
+  // 서보 드라이버 초기화
+  HCPCA9685.Init(SERVO_MODE);
+  HCPCA9685.Sleep(false);
+
+  Serial.begin(4800); // 시리얼 통신 초기화
+  delay(3000);
+
+  // 초기 위치로 이동
+  wakeUp();
+
+  // 스텝퍼 모터 초기 동작 수행 후 정지
+  baseMoveToStart();
+
+  // **서보모터 및 스텝퍼 모터 전원 차단 (엘보우 포함)**
+  HCPCA9685.Sleep(true); // 서보모터 PWM 신호 차단
+  digitalWrite(ENA, LOW); // 스텝퍼 모터 전원 차단
+}
+
+void loop() {
+  // **빈 루프 - 초기 동작 후 아무 동작 없음**
+}
+
+// TB6600을 사용한 베이스 초기 위치 설정 (한 방향으로 일정 시간만 회전)
+void baseMoveToStart() { 
+  Serial.println("Moving base to start position");
+  for (int i = 0; i < 200; i++) { // 200스텝만 회전 후 멈춤
+    digitalWrite(PUL, HIGH);
+    delayMicroseconds(stepDelay);
+    digitalWrite(PUL, LOW);
+    delayMicroseconds(stepDelay);
+  }
+}
+
+// 서보모터 초기화 함수 (초기 위치로 이동한 후 PWM 명령 중지)
+void wakeUp() {
+  Serial.println("Initializing Servo Motors");
+
+  // **엘보우 모터 (Servo 0, 1) 초기 위치 설정**
+  HCPCA9685.Servo(0, servo_joint_L_parking_pos);
+  HCPCA9685.Servo(1, servo_joint_R_parking_pos);
+  
+  // **나머지 서보모터 초기 위치 설정**
+  HCPCA9685.Servo(2, servo_joint_1_parking_pos);
+  HCPCA9685.Servo(3, servo_joint_2_parking_pos);
+  HCPCA9685.Servo(4, servo_joint_3_parking_pos);
+  HCPCA9685.Servo(5, servo_joint_4_parking_pos);
+
+  delay(2000); // 서보 모터 안정화 대기
+}
