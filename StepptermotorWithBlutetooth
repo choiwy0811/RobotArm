@@ -1,0 +1,47 @@
+#include <SoftwareSerial.h>
+
+// TB6600 스텝퍼 모터 핀 설정
+const int PUL = 7;  // Pulse 핀
+const int DIR = 6;  // 방향 핀
+const int ENA = 5;  // Enable 핀
+
+const int stepDelay = 20000;  // 스텝당 지연시간 (1000us)
+const int stepsPer30Degrees = 30;  // 30도 회전에 필요한 스텝 수 (1.8° 스텝 기준)
+
+SoftwareSerial HC05(10, 11);  // HC-05 블루투스 RX(2), TX(3)
+char state = 0; // 블루투스 입력 저장 변수
+
+void setup() {
+  pinMode(PUL, OUTPUT);
+  pinMode(DIR, OUTPUT);
+  pinMode(ENA, OUTPUT);
+
+  digitalWrite(ENA, HIGH); // 모터 활성화 (LOW = 활성화)
+  digitalWrite(DIR, HIGH); // 기본 방향 설정 (HIGH = 시계 방향)
+
+  Serial.begin(9600);
+  HC05.begin(9600);
+  Serial.println("Waiting for Bluetooth input...");
+}
+
+void loop() {
+  if (HC05.available()) { // 블루투스 데이터 수신
+    state = HC05.read();
+    Serial.print("BTstate: ");
+    Serial.println(state);
+
+    if (state == 'T') {
+      rotateStepper(stepsPer30Degrees); // 30도 회전
+    }
+  }
+}
+
+// TB6600 스텝퍼 모터 30도 회전
+void rotateStepper(int steps) {
+  for (int i = 0; i < steps; i++) {
+    digitalWrite(PUL, HIGH);
+    delayMicroseconds(stepDelay);
+    digitalWrite(PUL, LOW);
+    delayMicroseconds(stepDelay);
+  }
+}
