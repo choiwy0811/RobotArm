@@ -1,7 +1,7 @@
 // TB6600 스테퍼 모터 핀 설정
-const int PUL = 5;  // Pulse 핀
-const int DIR = 4;  // 방향 핀
-const int ENA = 6;  // Enable 핀
+const int PUL = 7;  // Pulse 핀
+const int DIR = 6;  // 방향 핀
+const int ENA = 5;  // Enable 핀
 
 const int stepDelay = 20000;  // 스텝당 지연시간 (20000)
 
